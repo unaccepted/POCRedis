@@ -1,0 +1,51 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+    xmlns:p="http://www.springframework.org/schema/p">
+    <!-- <bean id="sentinelBean" class="org.springframework.data.redis.connection.RedisSentinelConfiguration"
+        > <property name="master" value="mymaster" /> </bean> <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject"> <ref local="sentinelBean"/> </property> <property
+        name="targetMethod"> <value>setSentinel</value> </property> <property name="arguments">
+        <list> <value>localhost</value> <value>6380</value> </list> </property> </bean> -->
+    <bean id="sentinelBean"
+        class="org.springframework.data.redis.connection.RedisSentinelConfiguration">
+        <property name="master">
+            <bean class="org.springframework.data.redis.connection.RedisNode">
+                <property name="name" value="mymaster" />
+            </bean>
+        </property>
+         <property name="sentinels">
+            <set>
+                <bean class="org.springframework.data.redis.connection.RedisNode">
+                    <constructor-arg  value="127.0.0.1" />
+                    <constructor-arg value="26380" />
+                </bean>
+                 <bean class="org.springframework.data.redis.connection.RedisNode">
+                    <constructor-arg value="127.0.0.1" />
+                    <constructor-arg value="26381" />
+                </bean>
+                <bean class="org.springframework.data.redis.connection.RedisNode">
+                    <constructor-arg value="127.0.0.1" />
+                    <constructor-arg value="26382" />
+                </bean>
+            </set>
+        </property>
+    </bean>
+     
+     
+     
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig"
+        p:maxTotal="2000" p:maxIdle="1000" />
+    <!--bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+        p:host-name="172.16.29.248" p:port="6379" p:use-pool="true" p:pool-config-ref="jedisPoolConfig"/ -->
+    <bean id="jedisConnectionFactory"
+        class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+        p:use-pool="true" p:pool-config-ref="jedisPoolConfig" lazy-init="true">
+        <constructor-arg ref="sentinelBean" />
+    </bean>
+    <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate"
+        p:connection-factory-ref="jedisConnectionFactory" />
+    <bean id="slaveStringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate"
+        p:connection-factory-ref="jedisConnectionFactory" />
+</beans>
