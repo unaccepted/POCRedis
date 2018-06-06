@@ -18,6 +18,9 @@ In practical terms this means that using Sentinel, a Redis deployment can be cre
 All the redis servers including sentinel should be started before running the main program(App.java).  
 Now while main program is sending request(put & get), stop the master server. After some time, one of the slave will become master and the request will successfully being responded by the server.  
 
+You can find the above-mentioned configuration from below link:  
+https://github.com/unaccepted/Redis-Sentinel_ConfSetup
+
 # Windows  
 cd redis-config/sentinel3/windows  
 start-all.cmd  
